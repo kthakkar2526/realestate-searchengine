@@ -12,9 +12,16 @@ from core.sources import get_trusted_domain_list
 # Client setup
 # ---------------------------------------------------------------------------
 
-tavily = TavilyClient(api_key=os.environ.get("TAVILY_API_KEY", ""))
-
 MIN_TRUSTED_RESULTS = 3
+
+_tavily: TavilyClient | None = None
+
+
+def _get_tavily() -> TavilyClient:
+    global _tavily
+    if _tavily is None:
+        _tavily = TavilyClient(api_key=os.environ.get("TAVILY_API_KEY", ""))
+    return _tavily
 
 
 # ---------------------------------------------------------------------------
@@ -48,7 +55,7 @@ def search_real_estate(query: str) -> list[dict[str, Any]]:
     trusted_domains = get_trusted_domain_list()
 
     # Primary search – trusted domains only
-    trusted_response = tavily.search(
+    trusted_response = _get_tavily().search(
         query=query,
         search_depth="advanced",
         max_results=10,
@@ -61,7 +68,7 @@ def search_real_estate(query: str) -> list[dict[str, Any]]:
         return trusted_results
 
     # Fallback – broader search without domain restriction
-    broad_response = tavily.search(
+    broad_response = _get_tavily().search(
         query=query,
         search_depth="basic",
         max_results=5,

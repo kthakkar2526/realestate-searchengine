@@ -13,13 +13,21 @@ from core.models import SourceResult
 # Gemini setup
 # ---------------------------------------------------------------------------
 
-client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY", ""))
 MODEL = "gemini-2.5-flash"
+
+_client: genai.Client | None = None
+
+
+def _get_client() -> genai.Client:
+    global _client
+    if _client is None:
+        _client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY", ""))
+    return _client
 
 
 async def _gemini_json(*, system: str, user: str, temperature: float = 0.0) -> dict[str, Any]:
     """Non-streaming Gemini call that returns parsed JSON."""
-    response = await client.aio.models.generate_content(
+    response = await _get_client().aio.models.generate_content(
         model=MODEL,
         contents=user,
         config=types.GenerateContentConfig(
@@ -36,7 +44,7 @@ async def _gemini_json(*, system: str, user: str, temperature: float = 0.0) -> d
 
 async def _gemini_stream(*, system: str, user: str, temperature: float = 0.3) -> AsyncGenerator[str, None]:
     """Streaming Gemini call that yields text chunks."""
-    response = await client.aio.models.generate_content_stream(
+    response = await _get_client().aio.models.generate_content_stream(
         model=MODEL,
         contents=user,
         config=types.GenerateContentConfig(

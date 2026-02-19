@@ -135,7 +135,7 @@ Return JSON only in this schema:
 }
 
 Rules:
-- If query asks about market/trends/timing/prices/rent-vs-buy -> include market_context + market_snapshot (+ trend_chart if relevant).
+- If query asks about market/trends/timing/prices/rent-vs-buy -> include market_context + market_snapshot + trend_chart.
 - If query asks affordability/payment/mortgage/rent-vs-buy -> include affordability + scenario_explorer.
 - If query asks if priced right/offer/comps/rent estimate -> include valuation_comps + comps_table (+ distribution).
 - If query asks best neighborhoods/compare areas/commute -> include neighborhood_fit + map_view (+ market_snapshot).

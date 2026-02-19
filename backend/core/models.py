@@ -68,6 +68,7 @@ class StreamEvent(BaseModel):
         "trends",
         "comps",
         "error",
+        "clarification_needed",
         "domain_reject",
     ]
     data: Any

@@ -68,6 +68,9 @@ export interface SearchState {
   kpis: MarketKPIs | null;
   trends: TrendMetric[];
   comps: CompListing[];
+  needsClarification: boolean;
+  clarificationQuestion: string | null;
+  originalQuery: string | null;
 }
 
 const INITIAL_STATE: SearchState = {
@@ -83,6 +86,9 @@ const INITIAL_STATE: SearchState = {
   kpis: null,
   trends: [],
   comps: [],
+  needsClarification: false,
+  clarificationQuestion: null,
+  originalQuery: null,
 };
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -211,6 +217,18 @@ export function useSearch() {
               setState((prev) => ({ ...prev, comps: parsed as CompListing[] }));
               break;
 
+            case "clarification_needed": {
+              const clarData = parsed as { question: string; original_query: string };
+              setState((prev) => ({
+                ...prev,
+                needsClarification: true,
+                clarificationQuestion: clarData.question,
+                originalQuery: clarData.original_query,
+                isLoading: false,
+              }));
+              break;
+            }
+
             case "domain_reject":
               setState((prev) => ({
                 ...prev,
@@ -246,5 +264,15 @@ export function useSearch() {
     setState((prev) => ({ ...prev, isLoading: false }));
   }, []);
 
-  return { ...state, search, cancel };
+  const clarify = useCallback(async (answer: string) => {
+    setState((prev) => ({
+      ...prev,
+      needsClarification: false,
+      clarificationQuestion: null,
+      originalQuery: null,
+    }));
+    await search(answer);
+  }, [search]);
+
+  return { ...state, search, cancel, clarify };
 }

@@ -14,6 +14,7 @@ import ScenarioExplorer from "@/components/ScenarioExplorer";
 import MarketSnapshot from "@/components/MarketSnapshot";
 import TrendChart from "@/components/TrendChart";
 import CompsTable from "@/components/CompsTable";
+import ClarificationPrompt from "@/components/ClarificationPrompt";
 
 export default function Home() {
   const {
@@ -29,7 +30,10 @@ export default function Home() {
     kpis,
     trends,
     comps,
+    needsClarification,
+    clarificationQuestion,
     search,
+    clarify,
   } = useSearch();
 
   const { isDark, toggle } = useTheme();
@@ -85,6 +89,11 @@ export default function Home() {
               <div className="mt-6 p-4 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 text-sm">
                 {error}
               </div>
+            )}
+
+            {/* Clarification prompt */}
+            {needsClarification && clarificationQuestion && (
+              <ClarificationPrompt question={clarificationQuestion} onSubmit={clarify} />
             )}
 
             {/* Domain rejection */}

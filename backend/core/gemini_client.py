@@ -82,6 +82,37 @@ async def classify_domain(query: str) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+# 1.5. Query ambiguity detection
+# ---------------------------------------------------------------------------
+
+AMBIGUITY_SYSTEM = """You are a real estate query analyst. Determine if a user's query is too ambiguous to search effectively.
+
+A query is ambiguous if it has multiple unrelated interpretations OR is missing critical context (location, property type, etc.) that would significantly change the results.
+
+A query is NOT ambiguous if:
+- It has a clear real estate intent even without a location (e.g. "what is a cap rate", "how does escrow work")
+- The location is implied or unimportant to the answer
+- It is a general market or educational question
+
+Only flag as ambiguous when clarification would meaningfully change the search results.
+
+Respond with JSON only:
+{"is_ambiguous": true|false, "clarification_question": "short specific question to ask the user" | null}"""
+
+
+async def detect_query_ambiguity(query: str) -> dict[str, Any]:
+    """Return {"is_ambiguous": bool, "clarification_question": str|None}."""
+    result = await _gemini_json(system=AMBIGUITY_SYSTEM, user=query, temperature=0.0)
+    if "is_ambiguous" in result:
+        return {
+            "is_ambiguous": bool(result["is_ambiguous"]),
+            "clarification_question": result.get("clarification_question") if result.get("is_ambiguous") else None,
+        }
+    # Fail open – if detection breaks, don't block the query
+    return {"is_ambiguous": False, "clarification_question": None}
+
+
+# ---------------------------------------------------------------------------
 # 2. Semantic cache key generation
 # ---------------------------------------------------------------------------
 

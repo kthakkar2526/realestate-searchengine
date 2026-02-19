@@ -7,6 +7,7 @@ from core.cache import get_cached, set_cached, track_popular_query
 from core.gemini_client import (
     classify_domain,
     classify_intent,
+    detect_query_ambiguity,
     extract_comps,
     extract_market_kpis,
     extract_trends,
@@ -33,6 +34,20 @@ async def search_pipeline(query: str) -> AsyncGenerator[StreamEvent, None]:
             yield StreamEvent(
                 type="domain_reject",
                 data=classification.get("reason", "This query is not related to real estate."),
+            )
+            return
+
+        # ------------------------------------------------------------------
+        # Step 1.5: Ambiguity detection
+        # ------------------------------------------------------------------
+        ambiguity = await detect_query_ambiguity(query)
+        if ambiguity.get("is_ambiguous"):
+            yield StreamEvent(
+                type="clarification_needed",
+                data={
+                    "question": ambiguity["clarification_question"],
+                    "original_query": query,
+                },
             )
             return
 

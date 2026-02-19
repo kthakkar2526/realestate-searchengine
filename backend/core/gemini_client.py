@@ -96,8 +96,12 @@ A query is NOT ambiguous if:
 
 Only flag as ambiguous when clarification would meaningfully change the search results.
 
+When writing the clarification_question, always instruct the user to rephrase their full query with more detail. Never ask for a single missing piece like just location. Include an example of a well-formed query.
+
+Example clarification_question: "Your query is too vague. Could you rephrase it with more detail? e.g. '2-bedroom apartments for rent in Austin TX under $2000/month'"
+
 Respond with JSON only:
-{"is_ambiguous": true|false, "clarification_question": "short specific question to ask the user" | null}"""
+{"is_ambiguous": true|false, "clarification_question": "instruction to rephrase with example" | null}"""
 
 
 async def detect_query_ambiguity(query: str) -> dict[str, Any]:

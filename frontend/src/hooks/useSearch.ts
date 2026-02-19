@@ -265,14 +265,16 @@ export function useSearch() {
   }, []);
 
   const clarify = useCallback(async (answer: string) => {
+    const original = state.originalQuery;
+    const combinedQuery = original ? `${original} ${answer}` : answer;
     setState((prev) => ({
       ...prev,
       needsClarification: false,
       clarificationQuestion: null,
       originalQuery: null,
     }));
-    await search(answer);
-  }, [search]);
+    await search(combinedQuery);
+  }, [state.originalQuery, search]);
 
   return { ...state, search, cancel, clarify };
 }
